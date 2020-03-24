@@ -61,7 +61,7 @@ private:
 	float cX = 50.0f  ;  
 	//float yy = m_nSc
 	float cY = 50.0f  ;
-	float cZ = 0.0f;
+	float cZ = 10.0f;
 	vec3d test_point = { cX + 35.0f , cY + 35.0f , 0.0f };
 	vec3d C = { cX, cY, cZ };
 
@@ -126,14 +126,14 @@ public:
 		sqr.p3 = { 100.0f, 100.0f, 0.0f };
 		sqr.p4 = { 50.0f, 100.0f, 0.0f };
 
-		cub.p1 = { C.x-25.0f, C.y-25.0f, -25.0f };
-		cub.p2 = { C.x +25.0f, C.y -25.0f, -25.0f };
-		cub.p3 = { C.x +25.0f, C.y +25.0f, -25.0f };
-		cub.p4 = { C.x -25.0f, C.y + 25.0f, -25.0f };
-		cub.p5 = { C.x - 25.0f, C.y - 25.0f, 25.0f };
-		cub.p6 = { C.x + 25.0f, C.y - 25.0f, 25.0f };
-		cub.p7 = { C.x + 25.0f, C.y + 25.0f, 25.0f };
-		cub.p8 = { C.x - 25.0f, C.y + 25.0f, 25.0f };
+		cub.p1 = { C.x-25.0f,   C.y-25.0f,   C.z - 25.0f };
+		cub.p2 = { C.x +25.0f,  C.y -25.0f,  C.z - 25.0f };
+		cub.p3 = { C.x +25.0f,  C.y +25.0f,  C.z - 25.0f };
+		cub.p4 = { C.x -25.0f,  C.y + 25.0f, C.z - 25.0f };
+		cub.p5 = { C.x - 25.0f, C.y - 25.0f, C.z + 25.0f };
+		cub.p6 = { C.x + 25.0f, C.y - 25.0f, C.z + 25.0f };
+		cub.p7 = { C.x + 25.0f, C.y + 25.0f, C.z + 25.0f };
+		cub.p8 = { C.x - 25.0f, C.y + 25.0f, C.z + 25.0f };
 
 		return true;
 	}
