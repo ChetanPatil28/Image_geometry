@@ -195,8 +195,18 @@ class Mesh
 {
 public:
 	std::string file_path;
-	//std::vector<Vertex3D>vertices;
 	std::vector<Triangle>triangles;
+	
+	float minX = 10000.0f;
+	float maxX = -10000.0f;
+	float minY = 10000.0f;
+	float maxY = -10000.0f;
+	float minZ = 10000.0f;
+	float maxZ = -10000.0f;
+
+	Vertex3D Min = {10.000f, 10.000f , 10.000f };
+	Vertex3D Max = {10.000f, -10.000f , -10.000f };
+
 	Mesh();
 	Mesh(std::string fname) :file_path(fname) {}
 
@@ -220,9 +230,21 @@ public:
 			{
 
 				Vertex3D v;
-				s >> junk >> v.x >> v.y >> v.z;
+				float X, Y, Z;
+
+				s >> junk >> X >> Y >> Z;
+
+				if (X > Max.x) { Max.x = X; }
+				if (X < Min.x) { Min.x = X; }
+
+				if (Y > Max.y) { Max.y = Y; }
+				if (Y < Min.y) { Min.y = Y; }
+
+				if (Z > Max.z) { Max.z = Z; }
+				if (Z < Min.z) { Min.z = Z; }
+
 				//std::cout << v << std::endl;
-				vertices.push_back(v);
+				vertices.push_back({X, Y, Z});
 			}
 
 			if (line[0] == 'f')

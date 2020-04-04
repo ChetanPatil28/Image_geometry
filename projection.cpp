@@ -9,18 +9,18 @@ struct Vertex3i {
 	int x, y, z;
 };
 
-ostream& operator<<(ostream& disp, Vertex3i p)
+ostream& operator<<(ostream& disp, Vertex3i &p)
 {
 	return disp << " (" << p.x << "," << p.y << "," << p.z << ")" << endl;
 }
 
-Vertex3i float_to_int(Vertex3D& p)
+Vertex3i float_to_int(Vertex3D &p)
 {
 	return { (int)p.x, (int)p.y, (int)p.z };
 }
 
 
-Vertex3D MatMul(float m[][4], Vertex3D p)
+Vertex3D MatMul(float m[][4], Vertex3D &p)
 {
 	Vertex3D temp;
 	//cout << "Vertex b4 multiply is " << p << endl;
@@ -78,6 +78,11 @@ public:
 
 	float width = 200;
 	float height = 200;
+	Vertex3D mins;
+	Vertex3D maxs;
+	
+	float offSet = 2.0f;  //The bigger this number relative to gets, the smaller the object appers on screen
+
 	Vertex3D C = { 0.0f, 0.0f, 0.0f };
 
 	Vertex3D OrthoGraphicRotateZ(Vertex3D &i, float &theta)
@@ -120,8 +125,17 @@ public:
 	{
 		Mesh object(file);
 		object.buildMesh();
+
+		/*Xmin = object.minX; Xmax = object.maxX;
+		Ymin = object.minY; Ymax = object.maxY;
+		Zmin = object.minZ; Zmax = object.maxZ;
+*/
+		mins = object.Min;
+		maxs = object.Max;
+
 		tris = object.triangles;
-		OrthoGraphicMatrix ogm(+8.0f, -8.0f, -8.0f, +8.0f, -8.0f, +8.0f);
+		// pass the values in this order--> top, bottom, left, right, near, far
+		OrthoGraphicMatrix ogm(maxs.y * offSet, mins.y * offSet, mins.x * offSet, maxs.x * offSet, mins.z * offSet, maxs.z * offSet);
 		ogm.create_matrix(mat);
 		return true;
 	}
