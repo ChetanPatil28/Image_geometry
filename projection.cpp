@@ -25,9 +25,15 @@ Vertex3D MatMul(float m[][4], Vertex3D &p)
 	Vertex3D temp;
 	//cout << "Vertex b4 multiply is " << p << endl;
 
-	temp.x = (m[0][0] * p[0]) + m[0][3];
+	/*temp.x = (m[0][0] * p[0]) + m[0][3];
 	temp.y = (m[1][1] * p[1]) + m[1][3];
 	temp.z = (m[2][2] * p[2]) + m[2][3];
+*/
+	temp.x = (m[0][0] * p[0]) + (m[0][1] * p[1]) + (m[0][2] * p[2]) + (m[0][3] * 1);
+	temp.y = (m[1][0] * p[0]) + (m[1][1] * p[1]) + (m[1][2] * p[2]) + (m[1][3] * 1);
+	temp.z = (m[2][0] * p[0]) + (m[2][1] * p[1]) + (m[2][2] * p[2]) + (m[2][3] * 1);
+
+	float w = (m[3][0] * p[0]) + (m[3][1] * p[1]) + (m[3][2] * p[2]) + (m[3][3] * 0);
 
 	//cout << "X map to " << (int)temp.x << endl;
 	//cout << "Y map to " << (int)temp.y << endl;
@@ -36,8 +42,7 @@ Vertex3D MatMul(float m[][4], Vertex3D &p)
 	//cout << "Vertex aftr multiply is " << temp << endl;
 
 
-	float w = m[3][3];
-	//float w = 1;
+	//float w = 1.0f;
 	if (w != 0.0f)
 	{
 		temp /= w;
@@ -68,7 +73,7 @@ public:
 
 	olcEngine3D(string file_name)
 	{
-		m_sAppName = L"3D Demo";
+		m_sAppName = L"Perspective Demo";
 		file = file_name;
 	}
 
@@ -76,16 +81,19 @@ public:
 	vector<Triangle> tris;
 	float fTheta = 0;
 
-	float width = 200;
+	float width =200;
 	float height = 200;
 	Vertex3D mins;
 	Vertex3D maxs;
+
+	float Xmin = 10000.0f; float Ymin = 10000.0f; float Zmin = 10000.0f;
+	float Xmax = -10000.0f; float Ymax = -10000.0f; float Zmax = -10000.0f;
 	
-	float offSet = 2.0f;  //The bigger this number relative to gets, the smaller the object appers on screen
+	float offSet = 1.0f;  //The bigger this number relative to gets, the smaller the object appers on screen
 
 	Vertex3D C = { 0.0f, 0.0f, 0.0f };
 
-	Vertex3D OrthoGraphicRotateZ(Vertex3D &i, float &theta)
+	Vertex3D RotateZ(Vertex3D &i, float &theta)
 	{
 		float alpha = cosf(theta);
 		float beta = sinf(theta);
@@ -97,7 +105,7 @@ public:
 	}
 			
 	//                   PITCH
-	Vertex3D OrthoGraphicRotateY(Vertex3D &i, float &theta)
+	Vertex3D RotateY(Vertex3D &i, float &theta)
 	{
 		float alpha = cosf(theta);
 		float beta = sinf(theta);
@@ -109,7 +117,7 @@ public:
 	}
 		
 	//                          ROLL
-	Vertex3D OrthoGraphicRotateX(Vertex3D &i, float &theta)
+	Vertex3D RotateX(Vertex3D &i, float &theta)
 	{
 		float alpha = cosf(theta);
 		float beta = sinf(theta);
@@ -126,17 +134,29 @@ public:
 		Mesh object(file);
 		object.buildMesh();
 
-		/*Xmin = object.minX; Xmax = object.maxX;
-		Ymin = object.minY; Ymax = object.maxY;
-		Zmin = object.minZ; Zmax = object.maxZ;
-*/
-		mins = object.Min;
-		maxs = object.Max;
+		Xmin = object.MinX; Xmax = object.MaxX;
+		Ymin = object.MinY; Ymax = object.MaxY;
+		Zmin = object.MinZ; Zmax = object.MaxZ;
+
+		//mins = object.Min;
+		//maxs = object.Max;
 
 		tris = object.triangles;
 		// pass the values in this order--> top, bottom, left, right, near, far
-		OrthoGraphicMatrix ogm(maxs.y * offSet, mins.y * offSet, mins.x * offSet, maxs.x * offSet, mins.z * offSet, maxs.z * offSet);
-		ogm.create_matrix(mat);
+		//Matrix ogm(maxs.y * offSet, mins.y * offSet, mins.x * offSet, maxs.x * offSet, mins.z * offSet, maxs.z * offSet);
+
+		float top = Ymax * offSet; float bottom = Ymin * offSet;
+		float left = Xmin * offSet; float right = Xmax * offSet;
+
+		float nearr = 0.5f;
+		float farr = 10.0f;
+
+		Matrix ogm(top, bottom, left, right, nearr, farr);
+
+		//Matrix ogm(+8.0f, -8.0f, -8.0f, +8.0f, -8.0f, 8.0f);
+
+
+		ogm.create_PerspectiveMatrix(mat);
 		return true;
 	}
 
@@ -147,14 +167,32 @@ public:
 
 		for (int i = 0; i < tris.size(); i++)
 		{
+			Vertex3D p1 = tris[i].Point[0];
+			Vertex3D p2 = tris[i].Point[1];
+			Vertex3D p3 = tris[i].Point[2];
 
-			Vertex3D v1 = OrthoGraphicRotateZ(tris[i].Point[0], fTheta);
-			Vertex3D v2 = OrthoGraphicRotateZ(tris[i].Point[1], fTheta);
-			Vertex3D v3 = OrthoGraphicRotateZ(tris[i].Point[2], fTheta);
 
-			 v1 = OrthoGraphicRotateY(v1, fTheta);
-			 v2 = OrthoGraphicRotateY(v2, fTheta);
-			 v3 = OrthoGraphicRotateY(v3, fTheta);
+
+			//Vertex3D v1 = p1; Vertex3D v2 = p2; Vertex3D v3 = p3;
+
+			Vertex3D v1 = RotateZ(p1, fTheta);
+			Vertex3D v2 = RotateZ(p2, fTheta);
+			Vertex3D v3 = RotateZ(p3, fTheta);
+
+
+			 //v1 = RotateX(v1, fTheta);
+			 //v2 = RotateX(v2, fTheta);
+			 //v3 = RotateX(v3, fTheta);
+
+	/*		 v1 = RotateY(v1, fTheta);
+			 v2 = RotateY(v2, fTheta);
+			 v3 = RotateY(v3, fTheta);*/
+
+
+			float of = 2.7f;
+			// This z-plane translation is because some points get projected at the 
+			// back of the screen.!
+			v1.z += of; v2.z += of; v3.z += of;
 
 			//Vertex3D v1 = MatMul(mat, tris[i].Point[0]);
 			//Vertex3D v2 = MatMul(mat, tris[i].Point[1]);
@@ -173,10 +211,12 @@ public:
 			Vertex3D raster_points2 = v2.Ndc_to_Raster(width, height);
 			Vertex3D raster_points3 = v3.Ndc_to_Raster(width, height);
 
-			DrawTriangle(raster_points1.x, raster_points1.y,
-				raster_points2.x, raster_points2.y,
-				raster_points3.x, raster_points3.y, PIXEL_SOLID, FG_WHITE);
+			
 
+				DrawTriangle(raster_points1.x, raster_points1.y,
+					raster_points2.x, raster_points2.y,
+					raster_points3.x, raster_points3.y, PIXEL_SOLID, FG_WHITE);
+			
 
 
 		}
@@ -196,6 +236,5 @@ int main()
 		demo.Start();
 	return 0;
 
-	return  0;
 }
 

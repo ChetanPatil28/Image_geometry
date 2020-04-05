@@ -156,14 +156,14 @@ public:
 	{
 		//        Vertex3D = {1.}
 		float x1 = ((x + 1.0f) / 2.0f)*width;
-		float y1 = ((y + 1.0f) / 2.0f)*height;
+		float y1 =(1- ((y + 1.0f) / 2.0f))*height;
 		float z1 = z;
 		return { x1, y1,z1 };
 	}
 
 };
 
-class OrthoGraphicMatrix
+class Matrix
 {
 
 private:
@@ -171,18 +171,44 @@ private:
 
 public:
 	//float m[4][4] = {0.0f};
-	OrthoGraphicMatrix();
-	OrthoGraphicMatrix(float t, float b, float l, float r, float n, float f) :
+	Matrix();
+
+	Matrix(float t, float b, float l, float r, float n, float f) :
 		top(t), bottom(b), left(l), right(r), near(n), far(f) {}
 
-	void create_matrix(float m[][4])
+	void create_OrthoMatrix(float m[][4])
 	{
 		m[0][0] = 2 / (right - left); m[0][3] = -((right + left) / (right - left));
-		m[1][1] = 2 / (top - bottom); m[0][3] = -((top + bottom) / (top - bottom));
-		m[2][2] = 2 / (far - near);   m[0][3] = -((far + near) / (far - near));
+		m[1][1] = 2 / (top - bottom); m[1][3] = -((top + bottom) / (top - bottom));
+		m[2][2] = 2 / (far - near);   m[2][3] = -((far + near) / (far - near));
 		m[3][3] = 1.0f;
 
 	}
+
+	void create_PerspectiveMatrix(float m[][4])
+	{
+		m[0][0] = (2 * near) / (right - left); m[0][3] = -((near*(right + left)) / (right - left));
+		m[1][1] = (2 * near) / (top - bottom); m[1][3] = -((near*(top + bottom)) / (top - bottom));
+		m[2][2] = -((far + near) / (far - near));   m[2][3] = - (2* far* near) / (far - near);
+		m[3][2] = -1.0f;
+
+		//float fNear = 0.1f;
+		//float fFar = 200.0f;
+		//float fFov = 90.0f;
+		//float fAspectRatio = 1.0f;
+		//float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
+
+		//m[0][0] = fAspectRatio * fFovRad;
+		//m[1][1] = fFovRad;
+		//m[2][2] = fFar / (fFar - fNear);
+		//m[2][3] = (-fFar * fNear) / (fFar - fNear);
+		//m[3][2] = -1.0f;
+		//m[3][3] = 0.0f;
+	
+	
+	}
+
+
 };
 
 
@@ -197,12 +223,12 @@ public:
 	std::string file_path;
 	std::vector<Triangle>triangles;
 	
-	float minX = 10000.0f;
-	float maxX = -10000.0f;
-	float minY = 10000.0f;
-	float maxY = -10000.0f;
-	float minZ = 10000.0f;
-	float maxZ = -10000.0f;
+	float MinX = 10000.0f;
+	float MaxX = -10000.0f;
+	float MinY = 10000.0f;
+	float MaxY = -10000.0f;
+	float MinZ = 10000.0f;
+	float MaxZ = -10000.0f;
 
 	Vertex3D Min = {10.000f, 10.000f , 10.000f };
 	Vertex3D Max = {10.000f, -10.000f , -10.000f };
@@ -219,8 +245,9 @@ public:
 		std::ifstream myfile(file_path);
 
 		std::vector<Vertex3D>vertices;
-
+		int lenn = 0;
 		while (!myfile.eof())
+		//while(lenn<20)
 		{
 			std::getline(myfile, line);
 			std::strstream s;
@@ -234,14 +261,17 @@ public:
 
 				s >> junk >> X >> Y >> Z;
 
-				if (X > Max.x) { Max.x = X; }
-				if (X < Min.x) { Min.x = X; }
 
-				if (Y > Max.y) { Max.y = Y; }
-				if (Y < Min.y) { Min.y = Y; }
 
-				if (Z > Max.z) { Max.z = Z; }
-				if (Z < Min.z) { Min.z = Z; }
+
+				if (X > MaxX) { MaxX = X; }
+				if (X < MinX) { MinX = X; }
+
+				if (Y > MaxY) { MaxY = Y; }
+				if (Y < MinY) { MinY = Y; }
+
+				if (Z > MaxZ) { MaxZ = Z; }
+				if (Z < MinZ) { MinZ = Z; }
 
 				//std::cout << v << std::endl;
 				vertices.push_back({X, Y, Z});
@@ -258,6 +288,7 @@ public:
 				triangles.push_back(tri);
 
 			}
+			lenn += 1;
 
 		}
 
